@@ -1,0 +1,10 @@
+#include <Servo.h>
+Servo servo123;
+void setup() {
+servo123.attach(9);
+}
+void loop() {
+int lightpin = analogRead(A0);
+lightpin =map (lightpin, 0, 900, 180, 0);
+servo123.write(lightpin);
+}
