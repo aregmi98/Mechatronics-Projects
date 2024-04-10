@@ -1,0 +1,78 @@
+#include <NewPing.h>
+
+// Define ultrasonic sensor pins
+#define TRIGGER_PIN        9
+#define ECHO_PIN           10
+
+// Define motor control pins
+#define ENABLE             5
+#define DIRA               3
+#define DIRB               4
+
+// Define distance thresholds
+#define VERY_FAR_DISTANCE  75
+#define FAR_DISTANCE       40
+#define NEAR_DISTANCE      20
+#define VERY_NEAR_DISTANCE 10
+
+// Create an instance of the NewPing library
+NewPing sonar(TRIGGER_PIN, ECHO_PIN);
+
+void setup() {
+  // Initialize motor control pins
+  pinMode(ENABLE, OUTPUT);
+  pinMode(DIRA, OUTPUT);
+  pinMode(DIRB, OUTPUT);
+
+  // Initialize serial communication for monitoring
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Get distance from the ultrasonic sensor
+  int distance = sonar.ping_cm();
+
+  // Display the distance on the monitor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.print(" cm");
+
+  // Motor control based on distance
+  if (distance > VERY_FAR_DISTANCE) {
+    // Distance Very Far: motor keeps running
+    Serial.println(" - Very Far");
+    runMotor(255);  // Full speed forward
+  } else if (distance > FAR_DISTANCE) {
+    // Distance Far: motor keeps running with reduced speed
+    Serial.println(" - Far");
+    runMotor(150);  // Reduced speed forward
+  } else if (distance > NEAR_DISTANCE) {
+    // Distance Near: motor stops running
+    Serial.println(" - Near");
+    stopMotor();
+  } else if (distance > VERY_NEAR_DISTANCE) {
+    // Distance Very Near: motor runs in the reverse direction
+    Serial.println(" - Very Near");
+    runMotor(-150);  // Reverse at reduced speed
+  }
+
+  delay(100);  // Adjust delay as needed for your application
+}
+
+// Function to control the DC motor
+void runMotor(int speed) {
+  analogWrite(ENABLE, abs(speed));
+
+  if (speed > 0) {
+    digitalWrite(DIRA, HIGH);
+    digitalWrite(DIRB, LOW);
+  } else if (speed < 0) {
+    digitalWrite(DIRA, LOW);
+    digitalWrite(DIRB, HIGH);
+  }
+}
+
+// Function to stop the DC motor
+void stopMotor() {
+  analogWrite(ENABLE, 0);
+}
